@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black via-blue-400 to-blue-600 text-white font-sans">
+    <div class="container mx-auto p-8">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold mb-4">Weather Forecast</h1>
+            <p class="text-xl mb-8">Get the latest weather updates for your city</p>
+        </div>
+
+        <!-- Current Weather -->
+        <div class="bg-gray-300 p-6 rounded-lg shadow-xl max-w-md mx-auto mb-8">
+            <h2 class="text-2xl font-semibold text-black text-center" id="city">Phnom Penh</h2>
+            <h3 class="text-2xl font-semibold text-black text-center">welcome</h3>
+            <div class="flex justify-center items-center mt-4">
+                <div class="flex justify-center items-center">
+                    <svg
+                    class="w-32 h-32 p-6 text-yellow-400 fill-current animate-[spin_5s_linear_infinite;]"
+                    viewBox="0 0 512 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M256,104c-83.813,0-152,68.187-152,152s68.187,152,152,152,152-68.187,152-152S339.813,104,256,104Zm0,272A120,120,0,1,1,376,256,120.136,120.136,0,0,1,256,376Z"
+                    ></path>
+                    <rect
+                      class="animate-[pulse_1s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      y="16"
+                      x="240"
+                      height="48"
+                      width="32"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_2s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      y="448"
+                      x="240"
+                      height="48"
+                      width="32"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_1s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      y="240"
+                      x="448"
+                      height="32"
+                      width="48"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_2s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      y="240"
+                      x="16"
+                      height="32"
+                      width="48"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_1s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      transform="rotate(-45 416 416)"
+                      y="393.373"
+                      x="400"
+                      height="45.255"
+                      width="32"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_2s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      transform="rotate(-45 96 96)"
+                      y="73.373"
+                      x="80"
+                      height="45.255"
+                      width="32.001"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_1s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      transform="rotate(-45.001 96.002 416.003)"
+                      y="400"
+                      x="73.373"
+                      height="32"
+                      width="45.255"
+                    ></rect>
+                    <rect
+                      class="animate-[pulse_2s_cubic-bezier(0.4,_0,_0.6,_1)_infinite;]"
+                      transform="rotate(-45 416 96)"
+                      y="80"
+                      x="393.373"
+                      height="32.001"
+                      width="45.255"
+                    ></rect>
+                  </svg>
+                </div>
+            </div>
+            <p class="text-center text-black mt-4" id="current-weather">Loading...</p>
+        </div>
+
+        <!-- 5-Day Forecast -->
+        <div class="grid grid-cols-1 text-black sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Forecast will be dynamically inserted here -->
+        </div>
+
+        <!-- Air Quality -->
+        <div class="grid grid-cols-1 text-black sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8" id="air-quality-container">
+            <!-- Air quality data will go here -->
+        </div>
+
+        <!-- UV Index -->
+        <div class="grid grid-cols-1 text-black sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8" id="uv-index-container">
+            <!-- UV Index data will go here -->
+        </div>
+
+        <!-- Weather Alerts -->
+        <div class="grid grid-cols-1 text-black sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8" id="weather-alerts-container">
+            <!-- Weather alerts data will go here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_KEY = '5a695a768a529021468309f2271114a2';  // Replace with your OpenWeather API key
+            const city = 'Phnom Penh';
+
+            // Fetch current weather
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("city").textContent = data.name;
+                    document.getElementById("current-weather").textContent = `Temperature: ${data.main.temp}°C, ${data.weather[0].description}`;
+                })
+                .catch(error => console.error("Error fetching current weather:", error));
+
+            // Fetch 5-day forecast
+            fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`)
+                .then(response => response.json())
+                .then(data => {
+                    const forecastContainer = document.querySelector(".grid");
+                    forecastContainer.innerHTML = ''; // Clear previous forecast
+
+                    let forecastByDate = {};
+
+                    data.list.forEach(item => {
+                        const date = new Date(item.dt * 1000);
+                        const dateString = date.toLocaleDateString(); 
+
+                        if (!forecastByDate[dateString]) {
+                            forecastByDate[dateString] = [];
+                        }
+                        forecastByDate[dateString].push(item);
+                    });
+
+                    const dateKeys = Object.keys(forecastByDate).slice(0, 5);
+
+                    dateKeys.forEach(dateKey => {
+                        const forecastItem = document.createElement("div");
+                        forecastItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-xl", "text-center");
+
+                        const date = new Date(dateKey);
+                        const formattedDate = date.toLocaleDateString();
+                        const temp = `${forecastByDate[dateKey][0].main.temp}°C`; 
+                        const description = forecastByDate[dateKey][0].weather[0].description;
+
+                        forecastItem.innerHTML = `
+                            <h3 class="text-lg font-semibold">${formattedDate}</h3>
+                            <p class="text-xl mt-2">${temp}</p>
+                            <p class="mt-2 text-sm text-gray-600">${description}</p>
+                        `;
+                        forecastContainer.appendChild(forecastItem);
+                    });
+                })
+                .catch(error => console.error("Error fetching 5-day forecast:", error));
+
+            // Fetch Air Quality
+            fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=11.5564&lon=104.9282&appid=${API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    const airQualityContainer = document.getElementById("air-quality-container");
+                    airQualityContainer.innerHTML = '';
+
+                    const airQuality = data.list[0].components;
+                    const airQualityItem = document.createElement("div");
+                    airQualityItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-xl", "text-center");
+
+                    airQualityItem.innerHTML = `
+                        <h3 class="text-lg font-semibold">Air Quality</h3>
+                        <p class="text-xl mt-2">PM2.5: ${airQuality.pm2_5} µg/m³</p>
+                        <p class="mt-2 text-sm text-gray-600">CO: ${airQuality.co} µg/m³</p>
+                        <p class="mt-2 text-sm text-gray-600">NO2: ${airQuality.no2} µg/m³</p>
+                        <p class="mt-2 text-sm text-gray-600">O3: ${airQuality.o3} µg/m³</p>
+                    `;
+                    airQualityContainer.appendChild(airQualityItem);
+                })
+                .catch(error => console.error("Error fetching air quality:", error));
+
+            // Fetch UV Index API
+            fetch(`https://api.openweathermap.org/data/2.5/uvi?lat=11.5564&lon=104.9282&appid=${API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    const uvIndexContainer = document.getElementById("uv-index-container");
+                    uvIndexContainer.innerHTML = '';
+
+                    const uvIndex = data.value;
+                    const uvIndexItem = document.createElement("div");
+                    uvIndexItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-xl", "text-center");
+
+                    uvIndexItem.innerHTML = `
+                        <h3 class="text-lg font-semibold">UV Index</h3>
+                        <p class="text-xl mt-2">${uvIndex}</p>
+                        <p class="mt-2 text-sm text-gray-600">Moderate UV Exposure: ${uvIndex >= 3 && uvIndex <= 5 ? "Yes" : "No"}</p>
+                    `;
+                    uvIndexContainer.appendChild(uvIndexItem);
+                })
+                .catch(error => console.error("Error fetching UV Index:", error));
+
+            // Fetch Weather Alerts
+            fetch(`https://api.openweathermap.org/data/2.5/alerts?lat=11.5564&lon=104.9282&appid=${API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherAlertsContainer = document.getElementById("weather-alerts-container");
+                    weatherAlertsContainer.innerHTML = '';
+
+                    if (data.alerts) {
+                        data.alerts.forEach(alert => {
+                            const alertItem = document.createElement("div");
+                            alertItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-xl", "text-center");
+
+                            alertItem.innerHTML = `
+                                <h3 class="text-lg font-semibold">Weather Alert</h3>
+                                <p class="text-xl mt-2">${alert.event}</p>
+                                <p class="mt-2 text-sm text-gray-600">${alert.description}</p>
+                            `;
+                            weatherAlertsContainer.appendChild(alertItem);
+                        });
+                    } else {
+                        const noAlertsItem = document.createElement("div");
+                        noAlertsItem.classList.add("bg-white", "p-6", "rounded-lg", "shadow-xl", "text-center");
+
+                        noAlertsItem.innerHTML = `
+                            <h3 class="text-lg font-semibold">Weather Alerts</h3>
+                            <p class="text-xl mt-2">No active alerts</p>
+                        `;
+                        weatherAlertsContainer.appendChild(noAlertsItem);
+                    }
+                })
+                .catch(error => console.error("Error fetching weather alerts:", error));
+        });
+    </script>
+</body>
+</html>
