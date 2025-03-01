@@ -8,11 +8,11 @@
     <script defer src="main.js"></script>
   </head>
   <body
-    class="flex flex-col items-center justify-center min-h-screen bg-teal-400"
+    class="flex flex-col items-center justify-center min-h-screen bg-white"
   >
 <div class="w-full max-w-screen-lg px-4">
-    <h1 class="text-center p-10 font-bold mb-2">RECENT WEATHER</h1>
-    <p class="text-center text-gray-600 mb-8">
+    <h1 class="text-center text-6xl p-3 font-bold mb-2">RECENT WEATHER</h1>
+    <p class="text-center text-gray-600 mb-4">
         It is a long established fact that a reader will be distracted by readable
         content of the page when looking at its layout.
     </p>
@@ -21,6 +21,14 @@
 
     <div id="weather-container" class="flex flex-wrap justify-center px-4 gap-6 w-full max-w-screen-lg"></div>
       <!-- Weather cards will be dynamically updated here -->
+    </div>
+    <div>
+      <button
+        id="fetch-weather-btn"
+        class="bg-black text-teal-400 font-bold py-2 px-4 rounded-full shadow-lg mt-3 hover:shadow-xl transition duration-300"
+      >
+        Fetch Weather
+      </button>
     </div>
   </body>
 </html>

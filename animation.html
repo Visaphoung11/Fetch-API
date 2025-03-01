@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather & Air Quality Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <style>
+      /* From Uiverse.io by wztd */
+      .card {
+        --background: #fff;
+        --cardShadow: rgba(32, 33, 37, 0.1);
+        --cardShadowHover: rgba(32, 33, 37, 0.06);
+        --cardShadowActive: rgba(32, 33, 37, 0.55);
+        --cardBorder: #dbdce0;
+        --cardBorderActive: #1a73e8;
+        --textColor: #202125;
+        --linkColor: #1967d2;
+        --ratingColor: #faab00;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .card {
+          --background: #3c4043;
+          --cardShadow: rgba(0, 0, 0, 0.28);
+          --cardShadowHover: rgba(0, 0, 0, 0.16);
+          --cardShadowActive: rgba(0, 0, 0, 0.55);
+          --cardBorder: #202125;
+          --cardBorderActive: #8ab4f8;
+          --textColor: #e9eaee;
+          --linkColor: #8ab4f8;
+        }
+      }
+
+      .card {
+        width: 250px;
+        height: 350px;
+        aspect-ratio: 2/3;
+        background: var(--background);
+        color: var(--textColor);
+        border: 1px solid var(--cardBorder);
+        padding: 25px;
+        box-shadow: 8px 8px 0 var(--cardShadow);
+        transition: box-shadow 0.5s, transform 0.5s;
+        border-radius: 8px;
+        display: inline-block;
+      }
+
+      .card:hover {
+        transform: translate(-2px, -4px);
+        box-shadow: 16px 16px 0 var(--cardShadowHover);
+      }
+
+      .card:active {
+        transform: translate(-2px, -4px);
+        border: 2px solid var(--cardBorderActive);
+        box-shadow: 4px 4px 0 var(--cardShadowActive);
+      }
+
+      .card > .icon,
+      .card > .title,
+      .card > .description {
+        margin-bottom: 0.7em;
+        cursor: default;
+        user-select: none;
+      }
+
+      .card > .title {
+        margin-top: 1.5em;
+        font-weight: bold;
+      }
+
+      .card > .description {
+        line-height: 1.5em;
+        min-height: 6em;
+      }
+
+      .card > .icon {
+        font-size: 3em;
+        margin-bottom: 0.2em;
+      }
+
+      .card > .rating {
+        font-size: 1.5em;
+        margin-bottom: 0.8em;
+        color: var(--ratingColor);
+        font-weight: bold;
+        position: relative;
+        width: max-content;
+      }
+
+      .card > .rating:before {
+        content: "☆☆☆☆☆";
+      }
+
+      .card > .rating:after {
+        content: "★★★★★";
+        position: absolute;
+        left: 0;
+        z-index: 0;
+        width: calc(var(--rating) * 1%);
+        overflow: hidden;
+      }
+
+      .card > .link {
+        margin-bottom: 1rem;
+        color: var(--linkColor);
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+
+      /* Optional ~ Link the whole card */
+      .card > .link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .card > .link:after {
+        content: "↗";
+        display: inline-block;
+        margin-left: 0.3em;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .card:hover > .link:after {
+        transform: translate(0.2em, -0.2em);
+      }
+    </style>
+  </head>
+  <body>
+    <di class="flex flex-wrap justify-between mx-auto py-20 px-20 bg-[url(https://images.unsplash.com/photo-1502689444867-e9d77b2d4758?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGZvZ3xlbnwwfHwwfHx8MA%3D%3D)]">
+      <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 p-6">
+          <div id="weather-container" class="w-60"></div>
+          <div id="uv-index-container" class="w-60"></div>
+          <div id="weather-alerts-container" class="w-60"></div>
+          <div id="air-quality-container" class="w-60"></div>
+        </div>
+<article
+  class="w-72 bg-gray-700 shadow p-4 space-y-2 rounded-md hover:-translate-y-2 duration-300"
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    class="w-10 h-10 text-gray-300 bg-gray-600 rounded-full p-1"
+  >
+    <path
+      d="m8.032 12 1.984 1.984 4.96-4.96m4.55 5.272.893-.893a1.984 1.984 0 0 0 0-2.806l-.893-.893a1.984 1.984 0 0 1-.581-1.403V7.04a1.984 1.984 0 0 0-1.984-1.984h-1.262a1.983 1.983 0 0 1-1.403-.581l-.893-.893a1.984 1.984 0 0 0-2.806 0l-.893.893a1.984 1.984 0 0 1-1.403.581H7.04A1.984 1.984 0 0 0 5.055 7.04v1.262c0 .527-.209 1.031-.581 1.403l-.893.893a1.984 1.984 0 0 0 0 2.806l.893.893c.372.372.581.876.581 1.403v1.262a1.984 1.984 0 0 0 1.984 1.984h1.262c.527 0 1.031.209 1.403.581l.893.893a1.984 1.984 0 0 0 2.806 0l.893-.893a1.985 1.985 0 0 1 1.403-.581h1.262a1.984 1.984 0 0 0 1.984-1.984V15.7c0-.527.209-1.031.581-1.403Z"
+      stroke-width="2"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      stroke="currentColor"
+    ></path>
+  </svg>
+  <p class="text-sm w-full text-gray-400">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eget massa
+    interdum, rhoncus ex dignissim, ultricies tellus. Proin convallis mauris ut
+    est pulvinar aliquet. Nulla facilisi.
+  </p>
+</article>
+
+      </div>
+      <div>
+    <div class="container-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+      <!-- From Uiverse.io by wztd -->
+      <div class="card" style="--rating: 90; background-image: url('https://www.weatherhawks.com/content/images/size/w2000/2021/10/felix-mittermeier-unsplash_resize.jpg'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">⛅ </div> -->
+         <!-- <div class="title">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <div class="card" style="--rating: 90; background-image: url('https://t4.ftcdn.net/jpg/10/74/57/73/360_F_1074577325_jZqhRb5gBTrFxl6f0pAGrkgQpCSCqgxR.jpg'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">☀</div> -->
+         <!-- <div class="title text-black">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <!-- From Uiverse.io by wztd -->
+      <div class="card" style="--rating: 90; background-image: url('https://www.infoplease.com/sites/infoplease.com/files/styles/scale800w/public/daily-images/Weather-of-the-Day.jpg?itok=An4IRbv1'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">☔</div> -->
+         <!-- <div class="title">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <div class="card" style="--rating: 90; background-image: url('https://images.nationalgeographic.org/image/upload/t_edhub_resource_key_image/v1638886301/EducationHub/photos/lightning-bolts.jpg'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">🌅</div> -->
+         <!-- <div class="title text-black">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <!-- From Uiverse.io by wztd -->
+      <div class="card" style="--rating: 90; background-image: url('https://www.un.org/sites/un2.un.org/files/styles/large-article-image-style-16-9/public/field/image/2023/03/52196025795_06f077377a_c.jpg'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">🌃</div> -->
+         <!-- <div class="title">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <div class="card" style="--rating: 90; background-image: url('https://media-cldnry.s-nbcnews.com/image/upload/t_fit-1500w,f_auto,q_auto:best/rockcms/2024-10/20241017-winter-weather-sj-319p-362841.jpg'); background-size: cover; background-position: center;">
+         <!-- <div class="icon">🌊</div> -->
+         <!-- <div class="title text-black">Easy Cheesy</div> -->
+         <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+        This cheesy, juicy ultimate comforting lunch or quick and easy
+        dinner recipe.
+         </p> -->
+         <!-- <div class="rating"></div> -->
+         <!-- <a href="#" class="link">See the recipe</a> -->
+       </div>
+       <div class="card" style="--rating: 90; background-image: url('https://www.gohawaii.com/sites/default/files/styles/image_gallery_bg_xl/public/hero-unit-images/12934-p1bd4nb0m4khp1lsj18lvgh21kap.jpg.webp?itok=MC-DeNpY'); background-size: cover; background-position: center;">
+        <!-- <div class="icon">🌊</div> -->
+        <!-- <div class="title text-black">Easy Cheesy</div> -->
+        <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+       This cheesy, juicy ultimate comforting lunch or quick and easy
+       dinner recipe.
+        </p> -->
+        <!-- <div class="rating"></div> -->
+        <!-- <a href="#" class="link">See the recipe</a> -->
+      </div>
+      <div class="card" style="--rating: 90; background-image: url('https://images.pexels.com/photos/1446076/pexels-photo-1446076.jpeg?cs=srgb&dl=pexels-ralph-w-lambrecht-642090-1446076.jpg&fm=jpg'); background-size: cover; background-position: center;">
+        <!-- <div class="icon">🌊</div> -->
+        <!-- <div class="title text-black">Easy Cheesy</div> -->
+        <!-- <p class="description text-black" style="background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 8px;">
+       This cheesy, juicy ultimate comforting lunch or quick and easy
+       dinner recipe.
+        </p> -->
+        <!-- <div class="rating"></div> -->
+        <!-- <a href="#" class="link">See the recipe</a> -->
+      </div>
+    </div>
+    </di>
+    <script>
+      const API_KEY = "5a695a768a529021468309f2271114a2";
+      const LAT = 11.5564;
+      const LON = 104.9282;
+
+      async function fetchWeather() {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric`
+        );
+        const data = await response.json();
+        displayWeather(data);
+      }
+
+      function animateNumber(element, target) {
+        let current = 0;
+        const step = target / 50;
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          element.textContent = Math.round(current);
+        }, 30);
+      }
+
+      function displayWeather(data) {
+        document.getElementById("weather-container").innerHTML = `
+        <div class='bg-transparent ring-4 p-6 rounded-3xl shadow-xl text-center'>
+          <i class='fas fa-cloud-sun text-4xl text-yellow-500'></i>
+          <h3 class='text-gray-800 font-semibold'>${data.name}, ${
+          data.sys.country
+        }</h3>
+          <p>${new Date().toLocaleDateString()}</p>
+          <p class='text-5xl font-bold'><span id="temp">0</span>°C</p>
+          <p>${data.weather[0].main}</p>
+        </div>`;
+        animateNumber(
+          document.getElementById("temp"),
+          Math.round(data.main.temp)
+        );
+      }
+
+      async function fetchUVIndex() {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LAT}&lon=${LON}&appid=${API_KEY}`
+        );
+        const data = await response.json();
+        displayUVIndex(data.list[0].main.aqi);
+      }
+
+      function displayUVIndex(aqi) {
+        const uvLevels = ["Low", "Moderate", "High", "Very High", "Extreme"];
+        document.getElementById("uv-index-container").innerHTML = `
+        <div class='bg-transparent ring-4 p-6 rounded-3xl shadow-xl text-center'>
+          <i class='fas fa-sun text-4xl text-yellow-500'></i>
+          <h3 class='text-gray-800 font-semibold'>UV Index</h3>
+          <p>${new Date().toLocaleDateString()}</p>
+          <p class='text-5xl font-bold'><span id="uv">0</span></p>
+        </div>`;
+        animateNumber(document.getElementById("uv"), aqi);
+      }
+
+      async function fetchWeatherAlerts() {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}`
+        );
+        const data = await response.json();
+        displayWeatherAlerts(data.alerts || []);
+      }
+
+      function displayWeatherAlerts(alerts) {
+        document.getElementById("weather-alerts-container").innerHTML =
+          alerts.length
+            ? `
+        <div class='bg-red-300 p-6 rounded-3xl shadow-xl text-center'>
+          <i class='fas fa-exclamation-triangle text-4xl text-yellow-500'></i>
+          <h3 class='text-gray-800 font-semibold'>Weather Alert</h3>
+          <p>${alerts[0].event}</p>
+        </div>`
+            : `
+        <div class='bg-transparent ring-4 p-6 rounded-3xl shadow-xl text-center'>
+          <i class='fas fa-check-circle text-4xl text-yellow-500'></i>
+          <h3 class='text-gray-800 font-semibold'>No Alerts</h3>
+          <p>All clear</p>
+        </div>`;
+      }
+
+      async function fetchAirQuality() {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LAT}&lon=${LON}&appid=${API_KEY}`
+        );
+        const data = await response.json();
+        displayAirQuality(data.list[0]);
+      }
+
+      function displayAirQuality(data) {
+        const aqiLevel = ["Good", "Fair", "Moderate", "Poor", "Very Poor"];
+        document.getElementById("air-quality-container").innerHTML = `
+        <div class='bg-transparent ring-4 p-6 rounded-3xl shadow-xl text-center'>
+          <i class='fas fa-smog text-4xl text-yellow-500'></i>
+          <h3 class='text-gray-800 font-semibold'>Air Quality</h3>
+          <p class='text-5xl font-bold'><span id="aqi">0</span></p>
+          <p>${aqiLevel[data.main.aqi - 1]}</p>
+        </div>`;
+        animateNumber(document.getElementById("aqi"), data.main.aqi);
+      }
+
+      fetchWeather();
+      fetchUVIndex();
+      fetchWeatherAlerts();
+      fetchAirQuality();
+    </script>
+  </body>
+</html>
