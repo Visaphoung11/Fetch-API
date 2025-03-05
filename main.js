@@ -6,7 +6,7 @@ const images = [
   "https://static1.mclcm.net/iod/images/v2/69/citytheque/localite_101_5311/1200x600_80_300_000000x10x0.jpg",
   "https://blog.takemetour.com/wp-content/uploads/2019/10/Royal-Palace-Phnom-Penh-1024x682.jpg",
   "https://upload.wikimedia.org/wikipedia/commons/0/03/Wat_Phnom_Doun_Penh.jpg",
-  "https://static.ips-cambodia.com/wp-content/uploads/2023/01/Phnom-Penh-skyline-IPS-Cambodia.jpg",
+  "https://lh3.ggpht.com/svJG86H9H0sOQpIKlY3fCkngjntn7SL8dUcRt9lm-OYCJk0ICmSBf8akKqQtt9tiLzf_-LoiciTDPgxAbgtevPY=s900",
 ];
 
 const weatherIcons = {
